@@ -9,6 +9,39 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+
+        <TextView
+            android:text="Dashboard"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/txtTotalProducts"
+            android:text="Total Products: 0"
+            android:textSize="18sp"
+            android:layout_marginTop="12dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/txtTotalStock"
+            android:text="Total Stock: 0"
+            android:textSize="18sp"
+            android:layout_marginTop="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/txtLowStock"
+            android:text="Low Stock Items: 0"
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- 🔹 EXISTING BUTTONS (UNCHANGED) -->
         <Button
             android:id="@+id/btnProducts"
             android:text="Products"

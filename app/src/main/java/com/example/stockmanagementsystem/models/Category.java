@@ -6,7 +6,7 @@ public class Category {
     private String name;
 
     public Category() {
-        // Required for Firebase
+
     }
 
     public Category(String id, String name) {

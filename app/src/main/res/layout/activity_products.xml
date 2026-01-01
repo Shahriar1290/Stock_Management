@@ -5,14 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- 🔍 SEARCH BAR -->
+    <EditText
+        android:id="@+id/etSearch"
+        android:hint="Search product..."
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="@android:drawable/edit_text"/>
+
     <Button
         android:id="@+id/btnAddProduct"
         android:text="Add Product"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/productsRecycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"/>
 </LinearLayout>
