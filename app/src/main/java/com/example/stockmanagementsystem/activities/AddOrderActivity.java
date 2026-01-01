@@ -39,6 +39,9 @@ public class AddOrderActivity extends AppCompatActivity {
         btnStockIn = findViewById(R.id.btnStockIn);
         btnStockOut = findViewById(R.id.btnStockOut);
 
+        btnStockIn.setEnabled(false);
+        btnStockOut.setEnabled(false);
+
         loadProducts();
 
         btnStockIn.setOnClickListener(v -> processStock(true));
@@ -51,39 +54,78 @@ public class AddOrderActivity extends AppCompatActivity {
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (!snapshot.exists()) {
+                    Toast.makeText(AddOrderActivity.this,
+                            "No products available",
+                            Toast.LENGTH_LONG).show();
+                    finish();
+                    return;
+                }
+
                 ArrayAdapter<String> adapter =
                         new ArrayAdapter<>(AddOrderActivity.this,
                                 android.R.layout.simple_spinner_item);
 
                 for (DataSnapshot s : snapshot.getChildren()) {
                     String name = s.child("name").getValue(String.class);
-                    if (name != null) adapter.add(name);
+                    if (name != null) {
+                        adapter.add(name);
+                    }
+                }
+
+                if (adapter.getCount() == 0) {
+                    Toast.makeText(AddOrderActivity.this,
+                            "No products available",
+                            Toast.LENGTH_LONG).show();
+                    finish();
+                    return;
                 }
 
                 adapter.setDropDownViewResource(
                         android.R.layout.simple_spinner_dropdown_item);
                 spinnerProduct.setAdapter(adapter);
+
+                btnStockIn.setEnabled(true);
+                btnStockOut.setEnabled(true);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(AddOrderActivity.this,
+                        error.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+                finish();
+            }
         });
     }
 
-    //  Main stock logic
     private void processStock(boolean isStockIn) {
 
         String qtyStr = edtQuantity.getText().toString().trim();
-
         if (qtyStr.isEmpty()) {
             Toast.makeText(this, "Enter quantity", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        orderQty = Integer.parseInt(qtyStr);
+        try {
+            orderQty = Integer.parseInt(qtyStr);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Invalid quantity", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (orderQty <= 0) {
-            Toast.makeText(this, "Invalid quantity", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,
+                    "Quantity must be greater than 0",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (spinnerProduct.getSelectedItem() == null) {
+            Toast.makeText(this,
+                    "Select a product",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -98,6 +140,13 @@ public class AddOrderActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                        if (!snapshot.exists()) {
+                            Toast.makeText(AddOrderActivity.this,
+                                    "Product not found",
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
                         for (DataSnapshot s : snapshot.getChildren()) {
                             productId = s.getKey();
                             Integer currentQty =
@@ -107,7 +156,7 @@ public class AddOrderActivity extends AppCompatActivity {
 
                             if (!isStockIn && currentQty == 0) {
                                 Toast.makeText(AddOrderActivity.this,
-                                        "Stock is empty. Cannot stock out.",
+                                        "Stock is empty",
                                         Toast.LENGTH_SHORT).show();
                                 return;
                             }
@@ -126,8 +175,6 @@ public class AddOrderActivity extends AppCompatActivity {
                     public void onCancelled(@NonNull DatabaseError error) {}
                 });
     }
-
-    //  Update product quantity
     private void updateProductQuantity(DatabaseReference productsRef,
                                        String productId,
                                        int currentQty,
@@ -153,7 +200,6 @@ public class AddOrderActivity extends AppCompatActivity {
                 });
     }
 
-    //  Save order
     private void saveOrder(String type) {
 
         DatabaseReference ordersRef =

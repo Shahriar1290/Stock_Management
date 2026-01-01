@@ -23,7 +23,7 @@ public class DashboardActivity extends AppCompatActivity {
     Button btnProducts, btnCategories, btnOrders,
             btnSuppliers, btnUsers, btnDeleteAll, btnLogout;
 
-    private TextView txtTotalProducts, txtTotalStock, txtLowStock;
+    private TextView txtTotalProducts, txtTotalStock, txtLowStock, txtTotalIncome;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +33,7 @@ public class DashboardActivity extends AppCompatActivity {
         txtTotalProducts = findViewById(R.id.txtTotalProducts);
         txtTotalStock = findViewById(R.id.txtTotalStock);
         txtLowStock = findViewById(R.id.txtLowStock);
+        txtTotalIncome = findViewById(R.id.txtTotalIncome);
 
         btnProducts = findViewById(R.id.btnProducts);
         btnCategories = findViewById(R.id.btnCategories);
@@ -43,6 +44,7 @@ public class DashboardActivity extends AppCompatActivity {
         btnLogout = findViewById(R.id.btnLogout);
 
         loadDashboardData();
+        loadTotalSalesIncome();
 
         btnProducts.setOnClickListener(v ->
                 startActivity(new Intent(this, ProductsActivity.class)));
@@ -60,9 +62,9 @@ public class DashboardActivity extends AppCompatActivity {
                 startActivity(new Intent(this, UsersActivity.class)));
 
         btnLogout.setOnClickListener(v -> logout());
-
         btnDeleteAll.setOnClickListener(v -> confirmDeleteAll());
     }
+
     private void loadDashboardData() {
 
         DatabaseReference productsRef =
@@ -82,7 +84,7 @@ public class DashboardActivity extends AppCompatActivity {
                     Integer qty = ds.child("quantity").getValue(Integer.class);
                     if (qty != null) {
                         totalStock += qty;
-                        if (qty < 5) {
+                        if (qty <= 3) {
                             lowStock++;
                         }
                     }
@@ -98,6 +100,53 @@ public class DashboardActivity extends AppCompatActivity {
                 Toast.makeText(DashboardActivity.this,
                         error.getMessage(), Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    private void loadTotalSalesIncome() {
+
+        DatabaseReference ordersRef =
+                FirebaseDatabase.getInstance().getReference("orders");
+        DatabaseReference productsRef =
+                FirebaseDatabase.getInstance().getReference("products");
+
+        ordersRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                final double[] totalIncome = {0};
+
+                for (DataSnapshot orderSnap : snapshot.getChildren()) {
+
+                    String type = orderSnap.child("type").getValue(String.class);
+                    if (!"OUT".equals(type)) continue;
+
+                    String productId = orderSnap.child("productId").getValue(String.class);
+                    Integer qty = orderSnap.child("quantity").getValue(Integer.class);
+
+                    if (productId == null || qty == null) continue;
+
+                    productsRef.child(productId)
+                            .child("price")
+                            .get()
+                            .addOnSuccessListener(priceSnap -> {
+                                Double price = priceSnap.getValue(Double.class);
+                                if (price != null) {
+                                    totalIncome[0] += price * qty;
+                                    txtTotalIncome.setText(
+                                            "Total Sales: ₹" + totalIncome[0]
+                                    );
+                                }
+                            });
+                }
+
+                if (snapshot.getChildrenCount() == 0) {
+                    txtTotalIncome.setText("Total Sales: ₹0");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
