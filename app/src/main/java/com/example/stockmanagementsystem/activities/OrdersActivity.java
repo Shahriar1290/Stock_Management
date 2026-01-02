@@ -54,7 +54,7 @@ public class OrdersActivity extends AppCompatActivity {
                     Order o = s.getValue(Order.class);
                     if (o != null) {
                         orderList.add(new Order(
-                                s.getKey(),          // orderId
+                                s.getKey(),
                                 o.getProductId(),
                                 o.getProductName(),
                                 o.getQuantity(),
