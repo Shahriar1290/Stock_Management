@@ -50,6 +50,12 @@ dependencies {
 
     // Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+    implementation("com.google.android.material:material:1.11.0")
+
+    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-functions-ktx:20.2.0")
 
     // Firebase products
     implementation("com.google.firebase:firebase-auth")
